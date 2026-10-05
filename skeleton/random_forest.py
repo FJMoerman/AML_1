@@ -36,8 +36,16 @@ def sample_configuration(rng: np.random.Generator) -> Config:
     Return the hyperparameters to pass to RandomForestClassifier. Account for
     dependencies between parameters if you extend the example search space.
     """
+    #rng = np.random.default_rng(seed=42)
+    
+    max_depth = rng.choice(SEARCH_SPACE["max_depth"])
+    max_features = rng.choice(SEARCH_SPACE["max_features"])
+    min_samples_leaf = rng.choice(SEARCH_SPACE["min_samples_leaf"])
 
-    raise NotImplementedError("Implement sampling or use a package's sampler")
+    print(max_depth, max_features, min_samples_leaf)
+    return max_depth, max_features, min_samples_leaf
+
+    #raise NotImplementedError("Implement sampling or use a package's sampler")
 
 
 def make_classifier(config: Config, n_estimators: int, seed: int) -> RandomForestClassifier:
@@ -64,6 +72,7 @@ def predictive_metrics(
     your metrics require. Use the same definitions for validation, final testing,
     and the foundation comparison. This function must not fit the model.
     """
+    
 
     raise NotImplementedError("Implement predictive_metrics in random_forest.py")
 
@@ -125,3 +134,10 @@ def final_test_evaluation(
         "metrics": metrics,
         "elapsed_sec": float(perf_counter() - start),
     }
+
+def main():
+    rng = np.random.default_rng(seed=42)
+    sample_configuration(rng)
+
+if __name__ == "__main__":
+    main()
