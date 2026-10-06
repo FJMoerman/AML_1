@@ -5,10 +5,11 @@ Choose and explain the method's settings and how you retain search results.
 """
 
 from __future__ import annotations
+import numpy as np
 
 from typing import Any
 
-from random_forest import Config, Evaluator
+from random_forest import Config, Evaluator, sample_configuration, make_classifier
 
 
 def optimise_smbo(
@@ -26,4 +27,88 @@ def optimise_smbo(
     Return the selected configuration and results needed for your analysis.
     """
 
-    raise NotImplementedError
+    attempted_config = []
+    objectives = []
+
+    n_initial_eval = min(5, n_trials)
+
+    for n in range(n_initial_eval):
+        rng = np.random.default_rng(seed + n)
+        config = sample_configuration(rng)
+
+        if config in attempted_config:
+            continue
+
+        result = evaluator(config, n_trees, seed + n)
+        
+        attempted_config.append(config)
+        objectives.append(result["objective"])
+        print("Result bij smbo is ", result)
+
+    for n in range(n_trials - n_initial_eval):
+        X = np.array([
+            [
+                -1 if config["max_depth"] is None
+                else config["max_depth"],
+
+                0 if config["max_features"] == "sqrt"
+                else config["max_features"],
+
+                config["min_samples_leaf"],
+            ]
+            for config in attempted_config
+        ])
+
+        y = np.array[objectives]
+
+        surrogate = make_classifier(config, n_estimators=1000, seed=seed)
+
+        surrogate.fit(X, y)
+
+        candidates = []
+
+        for _ in range(1000):
+
+            candidate = sample_configuration(rng)
+
+            if candidate in attempted_config:
+                continue
+
+            candidates.append(candidate)
+
+        X_candidates = np.array([
+                [
+                    -1 if config["max_depth"] is None
+                    else config["max_depth"],
+
+                    0 if config["max_features"] == "sqrt"
+                    else config["max_features"],
+
+                    config["min_samples_leaf"],
+                ]
+                for config in candidates
+            ])
+
+        predictions = surrogate.predict(X_candidates)
+
+        best_i = np.argmax(predictions)
+
+        next_config = candidates[best_i]
+
+        result = evaluator(next_config, n_trees, seed)
+
+
+        attempted_config.append(next_config)
+        objectives.append(result["objective"])
+
+    best_index = np.argmax(predictions)
+
+    return attempted_config[best_index], {
+        "objective": objectives[best_index],
+        "configurations": attempted_config,
+        "objectives": objectives,
+    }
+
+
+
+        

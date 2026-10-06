@@ -7,6 +7,7 @@ to retain the results needed to analyse search progress and computational effort
 from __future__ import annotations
 import numpy as np
 from typing import Any
+from sklearn.ensemble import RandomForestRegressor
 
 from random_forest import Config, Evaluator, sample_configuration
 
@@ -26,10 +27,10 @@ def optimise_random_search(
     """
     attempted_config = []
     for n in range(n_trials):
-        rng = np.random.default_rng(seed)
+        rng = np.random.default_rng(seed + n)
         config = sample_configuration(rng)
-        result = evaluator(config, n_trees, seed)
+        result = evaluator(config, n_trees, seed + n)
         attempted_config.append(result)
     best_result = max(attempted_config, key=lambda result: result["objective"])
-    return best_result["configurarion"], attempted_config
+    return best_result["configuration"], attempted_config
     #raise NotImplementedError

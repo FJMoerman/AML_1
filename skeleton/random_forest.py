@@ -44,6 +44,16 @@ def sample_configuration(rng: np.random.Generator) -> Config:
     feature_config = rng.choice(SEARCH_SPACE["max_features"])
     leaf_config = rng.choice(SEARCH_SPACE["min_samples_leaf"])
     #return it in dictionary form
+
+    if feature_config == "sqrt":
+        feature_config = str(feature_config)
+    else:
+        feature_config = float(feature_config)
+
+    #print(type(depth_config), type(feature_config), type(leaf_config))
+    #print(depth_config, feature_config, leaf_config)
+
+
     return {
     "max_depth": depth_config,
     "max_features": feature_config,
@@ -139,3 +149,4 @@ def final_test_evaluation(
         "metrics": metrics,
         "elapsed_sec": float(perf_counter() - start),
     }
+
