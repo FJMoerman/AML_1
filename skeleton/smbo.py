@@ -6,6 +6,8 @@ Choose and explain the method's settings and how you retain search results.
 
 from __future__ import annotations
 import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+
 
 from typing import Any
 
@@ -43,7 +45,7 @@ def optimise_smbo(
         
         attempted_config.append(config)
         objectives.append(result["objective"])
-        print("Result bij smbo is ", result)
+        #print("Result bij smbo is ", result)
 
     for n in range(n_trials - n_initial_eval):
         X = np.array([
@@ -59,9 +61,9 @@ def optimise_smbo(
             for config in attempted_config
         ])
 
-        y = np.array[objectives]
+        y = np.array(objectives)
 
-        surrogate = make_classifier(config, n_estimators=1000, seed=seed)
+        surrogate = RandomForestRegressor(n_estimators=1000, random_state=seed)
 
         surrogate.fit(X, y)
 
