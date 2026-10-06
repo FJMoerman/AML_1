@@ -13,6 +13,10 @@ from typing import Any
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 Config = dict[str, Any]
 Evaluator = Callable[[Config, int, int], dict[str, Any]]
@@ -36,8 +40,14 @@ def sample_configuration(rng: np.random.Generator) -> Config:
     Return the hyperparameters to pass to RandomForestClassifier. Account for
     dependencies between parameters if you extend the example search space.
     """
-
-    raise NotImplementedError("Implement sampling or use a package's sampler")
+    depth_config = rng.choice(SEARCH_SPACE["max_depth"])
+    feature_config = rng.choice(SEARCH_SPACE["max_features"])
+    leaf_config = rng.choice(SEARCH_SPACE["min_samples_leaf"])
+    #return it in dictionary form
+    return {
+    "max_depth": depth_config,
+    "max_features": feature_config,
+    "min_samples_leaf": leaf_config}
 
 
 def make_classifier(config: Config, n_estimators: int, seed: int) -> RandomForestClassifier:
@@ -55,17 +65,20 @@ def make_classifier(config: Config, n_estimators: int, seed: int) -> RandomFores
     )
 
 
-def predictive_metrics(
-    model: Any, X: np.ndarray, y: np.ndarray
-) -> dict[str, float]:
+def predictive_metrics(model: Any, X: np.ndarray, y: np.ndarray) -> dict[str, float]:
     """TODO: evaluate the fitted model using your chosen predictive metrics.
 
     Return metric names mapped to scalar values. Choose the prediction outputs
     your metrics require. Use the same definitions for validation, final testing,
     and the foundation comparison. This function must not fit the model.
-    """
-
-    raise NotImplementedError("Implement predictive_metrics in random_forest.py")
+    """ 
+    y_pred = model.predict(X)
+    metrics_dict = {"accuracy": accuracy_score(y, y_pred),
+    "precision": precision_score(y, y_pred),
+    "recall": recall_score(y, y_pred),
+    "f1": f1_score(y, y_pred)}
+    return metrics_dict
+    #raise NotImplementedError("Implement predictive_metrics in random_forest.py")
 
 
 def validation_objective(metrics: dict[str, float]) -> float:
@@ -74,8 +87,9 @@ def validation_objective(metrics: dict[str, float]) -> float:
     Explain its relationship to the primary metric and whether higher or lower
     is better. Apply that direction consistently in all optimisers.
     """
-
-    raise NotImplementedError("Implement validation_objective in random_forest.py")
+    validation_objective = metrics["f1"]
+    return validation_objective
+    #raise NotImplementedError("Implement validation_objective in random_forest.py")
 
 
 def make_evaluator(
