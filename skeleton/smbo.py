@@ -63,7 +63,7 @@ def optimise_smbo(
 
         y = np.array(objectives)
 
-        surrogate = RandomForestRegressor(n_estimators=1000, random_state=seed)
+        surrogate = RandomForestRegressor(n_estimators=1000, random_state=seed+n)
 
         surrogate.fit(X, y)
 
@@ -93,17 +93,17 @@ def optimise_smbo(
 
         predictions = surrogate.predict(X_candidates)
 
-        best_i = np.argmax(predictions)
+        best_index = np.argmax(objectives)
 
-        next_config = candidates[best_i]
+        next_config = candidates[best_index]
 
-        result = evaluator(next_config, n_trees, seed)
+        result = evaluator(next_config, n_trees, seed + n)
 
 
         attempted_config.append(next_config)
         objectives.append(result["objective"])
 
-    best_index = np.argmax(predictions)
+    best_index = np.argmax(objectives)
 
     return attempted_config[best_index], {
         "objective": objectives[best_index],
