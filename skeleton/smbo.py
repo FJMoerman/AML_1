@@ -93,7 +93,7 @@ def optimise_smbo(
 
         predictions = surrogate.predict(X_candidates)
 
-        best_index = np.argmax(objectives)
+        best_index = np.argmax(predictions)
 
         next_config = candidates[best_index]
 
