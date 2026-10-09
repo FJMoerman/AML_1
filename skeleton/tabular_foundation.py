@@ -9,6 +9,12 @@ import numpy as np
 from data_loading import DataSplits
 from tabpfn import TabPFNClassifier, TabPFNRegressor
 from time import perf_counter
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+)
 
 def run_foundation_model(splits: DataSplits, seed: int) -> Any:
     """TODO: evaluate a pre-trained tabular foundation model.
@@ -33,16 +39,42 @@ def run_foundation_model(splits: DataSplits, seed: int) -> Any:
     fit_seconds = perf_counter() - start
 
     start = perf_counter()
-    pred_y_test = clf.predict(X_test)
+    batch_size = 16
+    predictions = []
+
+    for start_idx in range(0, len(X_test), batch_size):
+        end_idx = start_idx + batch_size
+        X_batch = X_test[start_idx:end_idx]
+
+        batch_predictions = clf.predict(X_batch)
+        predictions.append(batch_predictions)
+
+    pred_y_test = np.concatenate(predictions)
+    #pred_y_test = clf.predict(X_test)
     prediction_seconds = perf_counter() - start
 
-    return {
-        "predictions": pred_y_test,
-        "y_test": splits.y_test,
-        "fit_seconds": fit_seconds,
-        "prediction_seconds": prediction_seconds,
-        "total_seconds": fit_seconds + prediction_seconds,
-        "context_size": len(X_train),
+    metrics = {
+        "accuracy": accuracy_score(y_test, pred_y_test),
+        "precision": precision_score(
+            y_test, pred_y_test, average="macro", zero_division=0
+        ),
+        "recall": recall_score(
+            y_test, pred_y_test, average="macro", zero_division=0
+        ),
+        "f1": f1_score(
+            y_test, pred_y_test, average="macro", zero_division=0
+        ),
     }
+
+    return metrics
+
+    #return {
+    #    "predictions": pred_y_test,
+    #    "y_test": splits.y_test,
+    #    "fit_seconds": fit_seconds,
+    #    "prediction_seconds": prediction_seconds,
+    #    "total_seconds": fit_seconds + prediction_seconds,
+    #    "context_size": len(X_train),
+    #}
     #data --> statified sampling
     raise NotImplementedError

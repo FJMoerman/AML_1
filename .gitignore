@@ -15541,3 +15541,4 @@ skeleton/.venv/Scripts/pythonw.exe
 skeleton/.venv/Scripts/tqdm.exe
 skeleton/.venv/Scripts/ttx.exe
 skeleton/.venv/share/man/man1/ttx.1
+/skeleton/.venv

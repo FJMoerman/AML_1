@@ -1,0 +1,6 @@
+dataset,method,seed,search_seconds,fit_seconds,prediction_seconds,total_seconds,context_size,accuracy,precision,recall,f1,configuration
+covertype,default,17,0.07738750008866191,,,,,0.768,0.770214634235994,0.768,0.7630807913260773,{}
+covertype,random,17,0.7990357000380754,,,,,0.758,0.7625773740411498,0.758,0.7505194990664257,"{""max_depth"": 16, ""max_features"": 1.0, ""min_samples_leaf"": 1}"
+covertype,smbo,17,4.532493999926373,,,,,0.758,0.7535476750410084,0.758,0.7496825978625257,"{""max_depth"": 16, ""max_features"": 0.5, ""min_samples_leaf"": 1}"
+covertype,hyperband,17,1.2242485999595374,,,,,0.758,0.7625773740411498,0.758,0.7505194990664257,"{""max_depth"": 16, ""max_features"": 1.0, ""min_samples_leaf"": 1}"
+covertype,foundation,17,,,,,,,,,,{}

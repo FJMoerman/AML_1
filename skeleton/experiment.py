@@ -7,6 +7,11 @@ to save them and record the settings needed to reproduce your study.
 from __future__ import annotations
 
 import argparse
+import json
+import csv
+from datetime import datetime
+import numpy as np
+
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -44,13 +49,14 @@ PROFILES: dict[str, dict[str, Any]] = {
     },
 }
 
+# tabpfn_sk_KSiX8TO6DED_f8l3lGWEgORCow0fER2XioKkVNIIyhM
 
 def parse_args() -> argparse.Namespace:
     """Parse the reproducible experiment command-line options."""
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default="covertype", choices=[*DATASETS, "all"])
-    parser.add_argument("--profile", default="smoke", choices=PROFILES)
+    parser.add_argument("--profile", default="course", choices=PROFILES)
     parser.add_argument(
         "--methods",
         nargs="+",
@@ -138,9 +144,113 @@ def main() -> None:
     for name in names:
         print(f"Running {name} with seed {args.seed}", flush=True)
         results = run_dataset(name, args)
+        save_results(results, args, name)
+
         # TODO: save results in a format of your choice, along with the settings
         # needed to reproduce the run. Retain enough information for your plots
         # and tables. This example only prints final results; it saves no files.
+
+def json_default(value):
+    # Converts common python and numpy objects into compatible values.
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, Path):
+        return str(value)
+
+    raise TypeError(f"Cannot serialize {type(value).__name__}")
+
+def save_results(results, args, dataset_name):
+    # Save full experiment results and a flat CSV summary
+    output_dir = Path("experiment_results")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_name = (
+        f"{dataset_name}_{args.profile}_seed{args.seed}_{timestamp}"
+    )
+
+    # Record the settings needed to understand and reproduce the run.
+    record = {
+        "dataset": dataset_name,
+        "profile": args.profile,
+        "seed": args.seed,
+        "split_seed": args.split_seed,
+        "methods": args.methods,
+        "profile_settings": PROFILES[args.profile],
+        "results": results,
+    }
+
+    # Keep large prediction arrays out of the JSON file.
+    for result in record["results"]:
+        if result["method"] == "foundation":
+            foundation = result["result"]
+
+            predictions = foundation.pop("predictions", None)
+            y_test = foundation.pop("y_test", None)
+
+            if predictions is not None and y_test is not None:
+                predictions_path = output_dir / f"{run_name}_predictions.npz"
+                np.savez_compressed(
+                    predictions_path,
+                    predictions=predictions,
+                    y_test=y_test,
+                )
+                foundation["predictions_file"] = str(predictions_path)
+
+    # Save the complete record.
+    json_path = output_dir / f"{run_name}.json"
+    with json_path.open("w", encoding="utf-8") as file:
+        json.dump(record, file, indent=2, default=json_default)
+
+    # Create one flat row per method for easier comparison.
+    summary_rows = []
+    for result in results:
+        row = {
+            "dataset": result["dataset"],
+            "method": result["method"],
+            "seed": result["seed"],
+        }
+
+        if result["method"] == "foundation":
+            details = result["result"]
+            row.update({
+                "search_seconds": None,
+                "fit_seconds": details.get("fit_seconds"),
+                "prediction_seconds": details.get("prediction_seconds"),
+                "total_seconds": details.get("total_seconds"),
+                "context_size": details.get("context_size"),
+            })
+            metrics = details.get("metrics", {})
+        else:
+            row["search_seconds"] = result.get("search_seconds")
+            row["fit_seconds"] = None
+            row["prediction_seconds"] = None
+            row["total_seconds"] = None
+            row["context_size"] = None
+            metrics = result["final_result"].get("metrics", {})
+
+        for metric in ("accuracy", "precision", "recall", "f1"):
+            row[metric] = metrics.get(metric)
+
+        row["configuration"] = json.dumps(
+            result.get("configuration", {}),
+            default=json_default,
+        )
+        summary_rows.append(row)
+
+    csv_path = output_dir / f"{run_name}_summary.csv"
+    if summary_rows:
+        with csv_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(
+                file, fieldnames=list(summary_rows[0].keys())
+            )
+            writer.writeheader()
+            writer.writerows(summary_rows)
+
+    print(f"Saved full results to {json_path}")
+    print(f"Saved summary to {csv_path}")
 
 
 if __name__ == "__main__":
