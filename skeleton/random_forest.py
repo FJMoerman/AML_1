@@ -83,10 +83,13 @@ def predictive_metrics(model: Any, X: np.ndarray, y: np.ndarray) -> dict[str, fl
     and the foundation comparison. This function must not fit the model.
     """ 
     y_pred = model.predict(X)
-    metrics_dict = {"accuracy": accuracy_score(y, y_pred),
-    "precision": precision_score(y, y_pred),
-    "recall": recall_score(y, y_pred),
-    "f1": f1_score(y, y_pred)}
+    #added average weight for TabPFN as multiple target classes
+    metrics_dict = {
+    "accuracy": accuracy_score(y, y_pred),
+    "precision": precision_score(y, y_pred, average="weighted", zero_division=0),
+    "recall": recall_score(y, y_pred , average="weighted", zero_division=0),
+    "f1": f1_score(y, y_pred, average="weighted", zero_division=0)
+    }
     return metrics_dict
     #raise NotImplementedError("Implement predictive_metrics in random_forest.py")
 

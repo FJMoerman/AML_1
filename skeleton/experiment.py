@@ -49,12 +49,12 @@ def parse_args() -> argparse.Namespace:
     """Parse the reproducible experiment command-line options."""
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset", default="breast-w", choices=[*DATASETS, "all"])
+    parser.add_argument("--dataset", default="covertype", choices=[*DATASETS, "all"])
     parser.add_argument("--profile", default="smoke", choices=PROFILES)
     parser.add_argument(
         "--methods",
         nargs="+",
-        default=["default", "random", "smbo", "hyperband"],
+        default=["default", "random", "smbo", "hyperband", "foundation"],
         choices=["default", "random", "smbo", "hyperband", "foundation"],
     )
     parser.add_argument("--seed", type=int, default=17)
