@@ -1,5 +1,0 @@
-dataset,method,seed,search_seconds,fit_seconds,prediction_seconds,total_seconds,context_size,accuracy,precision,recall,f1,configuration
-breast-w,default,17,0.14886620012111962,,,,,0.9571428571428572,0.9571428571428572,0.9571428571428572,0.9571428571428572,{}
-breast-w,random,17,2.252165599958971,,,,,0.9642857142857143,0.9645660461986992,0.9642857142857143,0.9643722285263607,"{""max_depth"": 32, ""max_features"": ""sqrt"", ""min_samples_leaf"": 2}"
-breast-w,smbo,17,12.275182300014421,,,,,0.9642857142857143,0.9645660461986992,0.9642857142857143,0.9643722285263607,"{""max_depth"": 32, ""max_features"": ""sqrt"", ""min_samples_leaf"": 2}"
-breast-w,hyperband,17,3.5154424000065774,,,,,0.9714285714285714,0.9721269841269843,0.9714285714285714,0.9715631307468042,"{""max_depth"": 4, ""max_features"": 0.5, ""min_samples_leaf"": 4}"

@@ -15542,3 +15542,5 @@ skeleton/.venv/Scripts/tqdm.exe
 skeleton/.venv/Scripts/ttx.exe
 skeleton/.venv/share/man/man1/ttx.1
 /skeleton/.venv
+/experiment_results
+/data_cache

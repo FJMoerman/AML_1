@@ -49,7 +49,6 @@ PROFILES: dict[str, dict[str, Any]] = {
     },
 }
 
-# tabpfn_sk_KSiX8TO6DED_f8l3lGWEgORCow0fER2XioKkVNIIyhM
 
 def parse_args() -> argparse.Namespace:
     """Parse the reproducible experiment command-line options."""
@@ -60,10 +59,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--methods",
         nargs="+",
-        default=["default", "random", "smbo", "hyperband", "foundation"],
-        choices=["default", "random", "smbo", "hyperband", "foundation"],
+        default=["default", "random", "smbo", "hyperband", "foundatiwon"],
+        choices=["default", "random", "smbo", "hyperband", "foundatiown"],
     )
-    parser.add_argument("--seed", type=int, default=17)
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--split-seed", type=int, default=2026)
     parser.add_argument("--cache-dir", type=Path, default=Path("data_cache"))
     return parser.parse_args()
@@ -81,6 +80,7 @@ def run_dataset(name: str, args: argparse.Namespace) -> list[dict[str, Any]]:
     splits = load_and_split(name, args.cache_dir, profile["max_samples"], args.split_seed)
     results = []
     forest_methods = {"default", "random", "smbo", "hyperband"}.intersection(args.methods)
+    #forest_methods = {}
     if forest_methods:
         X_train, X_valid = prepare_data(splits)
         evaluator = make_evaluator(

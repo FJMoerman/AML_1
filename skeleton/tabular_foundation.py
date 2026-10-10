@@ -27,19 +27,19 @@ def run_foundation_model(splits: DataSplits, seed: int) -> Any:
     """
     #no pretraining --> too many parameters --> much work
     #in context learning
-    X_train = splits.X_train
-    y_train = splits.y_train
+    X_train = splits.X_train[:1024]
+    y_train = splits.y_train[:1024]
 
     X_test = splits.X_test
     y_test = splits.y_test
 
     start = perf_counter()
-    clf = TabPFNClassifier(random_state=seed)
+    clf = TabPFNClassifier(random_state=seed, device="cuda", show_progress_bar=True)
     clf.fit(X_train, y_train)
     fit_seconds = perf_counter() - start
 
     start = perf_counter()
-    batch_size = 16
+    batch_size = 1024
     predictions = []
 
     for start_idx in range(0, len(X_test), batch_size):
@@ -64,6 +64,9 @@ def run_foundation_model(splits: DataSplits, seed: int) -> Any:
         "f1": f1_score(
             y_test, pred_y_test, average="macro", zero_division=0
         ),
+        "total_seconds": fit_seconds + prediction_seconds,
+        "fit_seconds": fit_seconds,
+        "prediction_seconds": prediction_seconds
     }
 
     return metrics
